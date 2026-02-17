@@ -3,6 +3,7 @@ import { reactive } from 'vue'
 import config from '@/helpers/config'
 import { useSupabase } from '@/composables/useSupa'
 import { useRouter, useRoute } from 'vue-router'
+import { useToken } from '@/composables/useToken'
 
 const empleado = reactive({
   nombre: '',
@@ -21,10 +22,15 @@ const empleado = reactive({
 const props = defineProps({
   page: { type: String },
 })
-
+const { generarHash } = useToken()
 const { setTable } = useSupabase()
 const cambioRuta = useRouter()
 const route = useRoute()
+const datos = reactive({
+  email: history.state.email,
+  rol: history.state.rol,
+})
+
 const handleSubmit = async () => {
   const datosUsuario = {
     usuario: `${empleado.rol}-colibri`.toLowerCase(),
@@ -38,18 +44,23 @@ const handleSubmit = async () => {
     console.log('Usuario creado con éxito')
 
     await setTable('empleado', empleado).then(() => {
-      cambioRuta.push({ name: 'center-panel', query: route.query })
+      cambioRuta.push({ name: 'center-panel', query: route.query, params: route.query.rol })
     })
   } catch (error) {
     console.error('Error en el proceso de guardado:', error)
     alert('Error: Revisa que los campos no estén vacíos y que la conexión sea estable.')
   }
 }
-const back = () => {
+const back = async () => {
   console.log(route)
   cambioRuta.push({
     name: 'center-panel',
-    query: { email: route.query.email, rol: route.query.rol },
+    query: {
+      email: `${(await generarHash(route.query.email)).slice(0, (Math.random() * 10).toFixed())}-private[${route.query.email.slice(0, 1)}]`,
+      rol: `${(await generarHash(route.query.rol)).slice(0, (Math.random() * 10).toFixed())}-private[${route.query.rol.slice(0, 1).toLowerCase()}]`,
+    },
+    params: { user: route.query.rol.toLowerCase() },
+    state: { email: datos.email, rol: datos.rol },
   })
 }
 </script>

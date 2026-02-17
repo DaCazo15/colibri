@@ -30,6 +30,7 @@ const props = defineProps({
   buscar: { type: String },
   rol: { type: String },
   email: { type: String },
+  data: { type: Object, default: () => ({}) },
 })
 
 const empleadosOrdenados = computed(() => {
@@ -77,6 +78,7 @@ onMounted(async () => {
             :empleado="empleado"
             :rol="props.rol"
             :email="props.email"
+            :data="props.data"
           />
         </tbody>
       </table>

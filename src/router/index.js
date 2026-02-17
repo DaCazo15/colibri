@@ -21,7 +21,7 @@ const router = createRouter({
       component: () => import('../views/Login/RestorePassView.vue'),
     },
     {
-      path: '/center-panel:user',
+      path: '/center-panel:user?',
       name: 'center-panel',
       props: {
         page: 'Panel Central',

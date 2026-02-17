@@ -1,17 +1,22 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, reactive } from 'vue'
 import config from '@/helpers/config'
 import { useRoute, useRouter } from 'vue-router'
 import { useSupabase } from '@/composables/useSupa'
+import { useToken } from '@/composables/useToken'
 
+const { generarHash } = useToken()
 const { updateTable, getSelectTable } = useSupabase()
 
 const empleado = ref({})
-const cambioTura = useRouter()
-const ruta = useRoute()
 const cambioRuta = useRouter()
+const ruta = useRoute()
 const props = defineProps({
   page: { type: String },
+})
+const datos = reactive({
+  email: history.state.email,
+  rol: history.state.rol,
 })
 
 onMounted(async () => {
@@ -23,11 +28,21 @@ const handleSubmit = () => {
     cambioRuta.push({
       name: 'center-panel',
       query: { email: ruta.query.email, rol: ruta.query.rol },
+      params: { user: ruta.query.rol.toLowerCase() },
     }),
   )
 }
-const back = () => {
-  cambioTura.push({ name: 'center-panel', query: { email: ruta.query.email, rol: ruta.query.rol } })
+const back = async () => {
+  console.log(ruta)
+  cambioRuta.push({
+    name: 'center-panel',
+    query: {
+      email: `${(await generarHash(ruta.query.email)).slice(0, (Math.random() * 10).toFixed())}-private[${ruta.query.email.slice(0, 1)}]`,
+      rol: `${(await generarHash(ruta.query.rol)).slice(0, (Math.random() * 10).toFixed())}-private[${ruta.query.rol.slice(0, 1).toLowerCase()}]`,
+    },
+    params: { user: ruta.query.rol.toLowerCase() },
+    state: { email: datos.email, rol: datos.rol },
+  })
 }
 </script>
 

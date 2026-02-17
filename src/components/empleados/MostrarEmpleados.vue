@@ -5,6 +5,7 @@ const props = defineProps({
   empleado: { type: Object },
   rol: { type: String },
   email: { type: String },
+  data: { type: Object, default: () => ({}) },
 })
 
 const emit = defineEmits(['eliminar'])
@@ -63,6 +64,7 @@ const telefono = props.empleado.telefono.slice(0, 3) + ' ' + props.empleado.tele
           name: 'editar-empleado',
           params: { id: props.empleado.id },
           query: { email: props.email, rol: props.rol },
+          state: { email: props.data.email, rol: props.data.rol },
         }"
         class="cursor-pointer text-green-600 hover:text-green-700 transition-colors font-normal"
         >Editar</RouterLink
