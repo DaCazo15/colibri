@@ -113,7 +113,7 @@ const cerrarSesion = () => {
               placeholder="Buscar..."
               class="py-3 px-3 w-full bg-transparent border-2 border-blue-700 text-blue-700 rounded-lg mb-5 focus:outline-none focus:text-white"
             />
-            <RouterLink to="agregar-empleado" :query="{ email: email, rol: rol }">
+            <RouterLink to="agregar-empleado" :query="{ email: datos.email, rol: datos.rol }">
               Agregar
             </RouterLink>
           </div>
