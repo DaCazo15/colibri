@@ -44,6 +44,14 @@ const router = createRouter({
       },
       component: () => import('../views/form-empleado/EditarEmpleadoView.vue'),
     },
+    {
+      path: '/agregar-habitacion',
+      name: 'agregar-habitacion',
+      props: {
+        page: 'Registro de Habitaciones',
+      },
+      component: () => import('../views/form-habitaciones/AgregarHabitacionView.vue'),
+    },
   ],
 })
 

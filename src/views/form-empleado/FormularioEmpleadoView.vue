@@ -23,7 +23,7 @@ const props = defineProps({
   page: { type: String },
 })
 const { generarHash } = useToken()
-const { setTable } = useSupabase()
+const { setItem } = useSupabase()
 const cambioRuta = useRouter()
 const route = useRoute()
 const datos = reactive({
@@ -40,10 +40,10 @@ const handleSubmit = async () => {
   }
 
   try {
-    await setTable('usuario', datosUsuario)
+    await setItem('usuario', datosUsuario)
     console.log('Usuario creado con éxito')
 
-    await setTable('empleado', empleado).then(() => {
+    await setItem('empleado', empleado).then(() => {
       cambioRuta.push({ name: 'center-panel', query: route.query, params: route.query.rol })
     })
   } catch (error) {

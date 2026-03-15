@@ -28,10 +28,23 @@ export function useSupabase() {
     return data.rol // Retorna directamente el valor (ej. "ADMIN")
   }
 
-  const setTable = async (table, dataValue) => {
+  const setItem = async (table, dataValue) => {
     const { data, error } = await supabase.from(table).insert(dataValue).select()
     if (error) {
-      console.error(`Error en setTable (${table}):`, error.message)
+      console.error(`Error en setItem (${table}):`, error.message)
+      return { success: false, error }
+    }
+    return { success: true, data }
+  }
+
+  const setColumn = async (table, column, value) => {
+    const { data, error } = await supabase
+      .from(table)
+      .update({ [column]: value })
+      .eq('id', value.id)
+      .select()
+    if (error) {
+      console.error(`Error en setColumn (${table}):`, error.message)
       return { success: false, error }
     }
     return { success: true, data }
@@ -91,8 +104,9 @@ export function useSupabase() {
     supabase,
     getTable,
     getRolByEmail,
-    setTable,
     getSelectTable,
+    setItem,
+    setColumn,
     existeItemEnTabla,
     updateTable,
     deleteRow,

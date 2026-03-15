@@ -1,4 +1,5 @@
 <script setup>
+import DivisorUX from './UX/DivisorUX.vue'
 import config from '@/helpers/config'
 
 const props = defineProps({
@@ -6,13 +7,12 @@ const props = defineProps({
   rol: { type: String, required: true, default: '' },
 })
 
-// Corregido a formato Array
 const emit = defineEmits(['setSection'])
 </script>
 
 <template>
-  <div v-if="props.rol" class="bg-[#1f2937] rounded-lg py-5 px-7 gap-10 flex flex-col shadow">
-    <div class="bg-blue-500 h-2 -mb-2 mt-2 rounded-full opacity-80"></div>
+  <div v-if="props.rol" class="bg-[#1f2937] rounded-lg py-5 px-7 gap-5 flex flex-col shadow">
+    <DivisorUX />
 
     <div
       v-for="opcion in config.secciones(props.rol.toLowerCase())"
@@ -34,7 +34,7 @@ const emit = defineEmits(['setSection'])
           class="text-xl transition-colors"
           :class="props.section[opcion.nombre.toLowerCase()] ? 'text-gray-900' : 'text-white'"
         >
-          {{ opcion.nombre }}
+          {{ opcion.nombre === 'Configuracion' ? 'Configuración' : opcion.nombre }}
         </b>
       </div>
     </div>

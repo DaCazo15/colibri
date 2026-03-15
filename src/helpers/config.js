@@ -42,7 +42,7 @@ const opciones = {
   configuracion: {
     id: 8,
     icono: new URL('../assets/icons/config.png', import.meta.url).href,
-    nombre: 'Configuración',
+    nombre: 'Configuracion',
   },
 }
 

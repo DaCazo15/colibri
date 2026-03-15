@@ -6,10 +6,13 @@ import { useSupabase } from '@/composables/useSupa'
 import RouterLink from '@/components/RouterLink.vue'
 import useSection from '@/composables/useSection'
 
+import HeaderComponent from '@/components/HeaderComponent.vue'
 import ListarEmpleados from '@/components/empleados/ListarEmpleados.vue'
 import OpcionesComponent from '@/components/OpcionesComponent.vue'
 import FormReserva from '@/components/reserva/FormReserva.vue'
 import ListarHuesped from '@/components/huesped/ListarHuesped.vue'
+import SectionHabitaciones from '@/components/habitaciones/SectionHabitaciones.vue'
+import ConfiguracionesSistema from '@/components/ConfiguracionesSistema.vue'
 
 const { getTable, deleteRow } = useSupabase()
 const { section, setSection } = useSection()
@@ -65,36 +68,7 @@ const cerrarSesion = () => {
 <template>
   <div v-if="ruta.query" class="min-h-screen bg-gray-50 flex flex-col font-sans">
     <!-- header -->
-    <header class="bg-[#1f2937] shadow-sm sticky top-0 z-50">
-      <div class="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10 w-full">
-        <div class="flex justify-between h-16 items-center">
-          <div class="flex items-center gap-3">
-            <!-- logo placeholder -->
-            <div
-              class="w-8 h-8 bg-indigo-600 rounded-md flex items-center justify-center shadow-sm"
-            >
-              <span class="text-white font-bold text-lg">C</span>
-            </div>
-            <h1 class="text-2xl font-bold text-gray-50 tracking-tight">Colibri</h1>
-          </div>
-          <!-- opciones usuario -->
-          <div class="flex items-center gap-4">
-            <div class="hidden md:flex flex-col items-end">
-              <span class="text-sm font-semibold text-gray-200">{{ datos.rol }}</span>
-              <span class="text-xs text-gray-50">{{ datos.email }}</span>
-            </div>
-            <div class="h-8 w-px bg-gray-200 mx-2 hidden md:block"></div>
-            <button class="p-2 cursor-pointer" @click="cerrarSesion">
-              <img
-                src="../assets/icons/salir.png"
-                alt="opciones"
-                class="w-6 h-6 invert hover:invert-50 transition-colors"
-              />
-            </button>
-          </div>
-        </div>
-      </div>
-    </header>
+    <HeaderComponent :datos="datos" @cerrarSesion="cerrarSesion" />
 
     <!-- contenido -->
     <main class="flex-1 max-w-7xl w-full mx-auto py-8 px-4 sm:px-6 lg:px-8">
@@ -113,7 +87,7 @@ const cerrarSesion = () => {
               type="text"
               v-model="buscar"
               placeholder="Buscar..."
-              class="py-3 px-3 w-full bg-transparent border-2 border-blue-700 text-blue-700 rounded-lg mb-5 focus:outline-none focus:text-white"
+              class="py-3 px-3 w-600 bg-transparent border-2 border-blue-700 text-blue-700 rounded-lg mb-5 focus:outline-none focus:text-white"
             />
             <RouterLink
               to="agregar-empleado"
@@ -137,21 +111,20 @@ const cerrarSesion = () => {
         </section>
         <!-- Habitaciones -->
         <section v-if="section.habitaciones" class="flex-1 w-full min-w-0">
-          <div class="w-full flex justify-end gap-3 items-center">
-            <div class="w-full flex flex-row gap-6">
-              <button
-                class="mb-5 p-3 mx-auto w-full rounded-lg border-2 border-blue-700 text-blue-700 text-center hover:bg-blue-500 hover:text-white transition-colors"
-                @click="setSection('reservas')"
-              >
-                Disponible
-              </button>
-              <button
-                class="mb-5 p-3 mx-auto w-full rounded-lg border-2 border-blue-700 text-blue-700 text-center hover:bg-blue-500 hover:text-white transition-colors"
-                @click="setSection('reservas')"
-              >
-                Ocupado
-              </button>
-            </div>
+          <div class="w-full flex flex-col justify-end items-center">
+            <RouterLink
+              v-if="['ADMIN', 'ADMINISTRADOR'].includes(datos.rol?.toUpperCase())"
+              to="agregar-habitacion"
+              :query="{
+                email: datos.email,
+                rol: datos.rol,
+                rolUser: datos.rol,
+                emailUser: datos.email,
+              }"
+            >
+              Agregar Habitación
+            </RouterLink>
+            <SectionHabitaciones />
           </div>
         </section>
         <!-- Reservas-->
@@ -177,6 +150,10 @@ const cerrarSesion = () => {
             </button>
           </div>
           <ListarHuesped @eliminar="eliminarEmpleado" :buscar="buscar" />
+        </section>
+        <!-- Opciones -->
+        <section v-if="section.configuracion" class="flex-1 w-full min-w-0">
+          <ConfiguracionesSistema />
         </section>
       </div>
     </main>
