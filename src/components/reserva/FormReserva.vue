@@ -1,90 +1,120 @@
 <script setup>
-import { reactive, ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import config from '@/helpers/config'
+import objetos from '@/helpers/objetos'
 import FormHospedajeExtra from './FormReservaExtra.vue'
 import { useSupabase } from '../../composables/useSupa'
 import useSection from '@/composables/useSection'
 
-const { setItem, getTable, supabase } = useSupabase()
+const { setItem, getTable, setColumnItem } = useSupabase()
 const { setSection } = useSection()
+
 const submitting = ref(false)
-const reserva = reactive({
-  // Datos del Huésped Representante
-  encargado: '',
-  encargado_apellido: '',
-  encargado_cedula: '',
-  encargado_telefono: '',
-
-  // Datos de la Reserva
-  check_in: '3:00:00 PM',
-  check_out: '12:00:00 PM',
-  habitacion: '',
-  fecha_reserva: '',
-  fecha_entrada: '',
-  fecha_salida: '',
-  cantidad_personas: 1,
-  metodode_pago: 'Transferencia',
-  facturacion: '',
-  // Datos de acompañantes (Array de objetos)
-  demas: [],
-})
-
 const data = ref([])
 
 onMounted(async () => {
   data.value = await getTable('habitaciones')
 })
 
+// Vigilante para acompañantes
 watch(
-  () => reserva.cantidad_personas,
+  () => objetos.reserva.cantidad_personas,
   (newVal) => {
     const acompañantesNecesarios = newVal - 1
-
-    while (reserva.demas.length < acompañantesNecesarios) {
-      reserva.demas.push({ nombre: '', apellido: '', cedula: '', telefono: '' })
+    while (objetos.reserva.demas.length < acompañantesNecesarios) {
+      objetos.reserva.demas.push({ nombre: '', apellido: '', cedula: '', telefono: '' })
     }
-
-    if (reserva.demas.length > acompañantesNecesarios) {
-      reserva.demas.splice(acompañantesNecesarios)
+    if (objetos.reserva.demas.length > acompañantesNecesarios) {
+      objetos.reserva.demas.splice(acompañantesNecesarios)
     }
   },
   { immediate: true },
 )
 
 const labelClass = 'block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2'
+
 const clear = () => {
-  reserva.encargado = ''
-  reserva.encargado_apellido = ''
-  reserva.encargado_cedula = ''
-  reserva.encargado_telefono = ''
-  reserva.habitacion = ''
-  reserva.fecha_reserva = ''
-  reserva.fecha_entrada = ''
-  reserva.fecha_salida = ''
-  reserva.cantidad_personas = 1
-  reserva.metodode_pago = 'Transferencia'
-  reserva.facturacion = ''
-  reserva.demas = []
+  // Reseteo profundo para asegurar limpieza
+  objetos.reserva.encargado = ''
+  objetos.reserva.encargado_apellido = ''
+  objetos.reserva.encargado_cedula = ''
+  objetos.reserva.encargado_telefono = ''
+  objetos.reserva.habitacion = ''
+  objetos.reserva.fecha_reserva = ''
+  objetos.reserva.fecha_entrada = ''
+  objetos.reserva.fecha_salida = ''
+  objetos.reserva.cantidad_personas = 1
+  objetos.reserva.metodode_pago = 'Transferencia'
+  objetos.reserva.facturacion = ''
+  objetos.reserva.demas = []
 }
+
+// Función para limpiar strings vacíos y evitar errores de Postgres (DATE/INT)
+const cleanData = (obj) => {
+  const cleaned = { ...obj }
+  for (const key in cleaned) {
+    if (cleaned[key] === '') cleaned[key] = null
+  }
+  return cleaned
+}
+
+const asignarHistorial = (reserva) => {
+  const habSeleccionada = data.value.find((h) => h.id === reserva.habitacion)
+  const nombreHab = habSeleccionada
+    ? `${habSeleccionada.numero_habitacion}${habSeleccionada.torre}`
+    : 'N/A'
+
+  // Importante: No uses strings vacíos en arrays si la columna espera JSON válido
+  Object.assign(objetos.usu_historial_reserva, {
+    name_huesped: `${reserva.encargado} ${reserva.encargado_apellido}`,
+    cedula_identidad: reserva.encargado_cedula,
+    habitacion: nombreHab,
+    fecha_reserva: reserva.fecha_reserva,
+    reserva: reserva, // Supabase manejará esto como JSONB automáticamente
+    servicio: [],
+    inventario_habitacion: [],
+    multa: [],
+    temporada: false,
+    facturacion: [],
+  })
+}
+
 const guardarReserva = async () => {
   if (submitting.value) return
+
+  // Validación mínima: debe haber una habitación seleccionada
+  if (Object.values(objetos.reserva).includes('')) {
+    alert('Existen campos sin llenar')
+    return
+  }
+
   submitting.value = true
-  console.log(reserva)
-  const result = await setItem('huesped', reserva)
-  if (result.success) {
-    // Update the room status to 'Reservado'
-    const { error } = await supabase
-      .from('habitaciones')
-      .update({ estatus: 'Reservado' })
-      .eq('id', reserva.habitacion)
-    if (error) {
-      console.error('Error updating room status:', error.message)
-    } else {
+
+  try {
+    // 1. Preparamos el historial
+    asignarHistorial(objetos.reserva)
+
+    // 2. Limpiamos los datos de la reserva para evitar el error de "date: '' "
+    const reservaLimpia = cleanData(objetos.reserva)
+
+    // 3. Ejecutamos las inserciones
+    const [resHuesped, resHistorial] = await Promise.all([
+      setItem('huesped', reservaLimpia),
+      setItem('usu_historial_reserva', objetos.usu_historial_reserva),
+      setColumnItem('habitaciones', 'estatus', 'Reservado', objetos.reserva.habitacion),
+    ])
+
+    if (resHuesped.success && resHistorial.success) {
       clear()
       setSection('huespedes')
+    } else {
+      console.error('Error en el proceso de guardado')
     }
+  } catch (e) {
+    console.error('Error inesperado:', e)
+  } finally {
+    submitting.value = false
   }
-  submitting.value = false
 }
 </script>
 
@@ -104,7 +134,7 @@ const guardarReserva = async () => {
             type="text"
             :class="config.inputClass"
             placeholder="Nombre"
-            v-model="reserva.encargado"
+            v-model="objetos.reserva.encargado"
           />
         </div>
 
@@ -114,7 +144,7 @@ const guardarReserva = async () => {
             type="text"
             :class="config.inputClass"
             placeholder="Apellido"
-            v-model="reserva.encargado_apellido"
+            v-model="objetos.reserva.encargado_apellido"
           />
         </div>
 
@@ -124,7 +154,7 @@ const guardarReserva = async () => {
             type="text"
             :class="config.inputClass"
             placeholder="Cedula"
-            v-model="reserva.encargado_cedula"
+            v-model="objetos.reserva.encargado_cedula"
           />
         </div>
 
@@ -134,7 +164,7 @@ const guardarReserva = async () => {
             type="text"
             :class="config.inputClass"
             placeholder="Teléfono"
-            v-model="reserva.encargado_telefono"
+            v-model="objetos.reserva.encargado_telefono"
           />
         </div>
 
@@ -147,16 +177,16 @@ const guardarReserva = async () => {
             type="number"
             min="1"
             step="1"
-            v-model="reserva.cantidad_personas"
+            v-model="objetos.reserva.cantidad_personas"
             :class="config.inputClass"
           />
         </div>
         <div class="flex flex-col">
           <label :class="labelClass">Nro. de habitacion</label>
-          <select v-model="reserva.habitacion" :class="config.inputClass">
+          <select v-model="objetos.reserva.habitacion" :class="config.inputClass">
             <option value="">-- Seleccione --</option>
             <option v-for="value in data" :key="value.id" :value="value.id">
-              {{ value.numero_habitacion }}
+              {{ value.numero_habitacion }}{{ value.torre }}
             </option>
           </select>
         </div>
@@ -167,7 +197,7 @@ const guardarReserva = async () => {
 
         <div class="flex flex-col">
           <label :class="labelClass">Fecha de Reserva</label>
-          <input type="date" v-model="reserva.fecha_reserva" :class="config.inputClass" />
+          <input type="date" v-model="objetos.reserva.fecha_reserva" :class="config.inputClass" />
         </div>
 
         <div class="md:col-span-2 border-b border-gray-700 pb-2 mt-4">
@@ -190,17 +220,17 @@ const guardarReserva = async () => {
 
         <div class="flex flex-col">
           <label :class="labelClass">Fecha de Entrada</label>
-          <input type="date" v-model="reserva.fecha_entrada" :class="config.inputClass" />
+          <input type="date" v-model="objetos.reserva.fecha_entrada" :class="config.inputClass" />
         </div>
 
         <div class="flex flex-col">
           <label :class="labelClass">Fecha de Salida</label>
-          <input type="date" v-model="reserva.fecha_salida" :class="config.inputClass" />
+          <input type="date" v-model="objetos.reserva.fecha_salida" :class="config.inputClass" />
         </div>
 
         <div class="flex flex-col">
           <label :class="labelClass">Método de Pago</label>
-          <select v-model="reserva.metodode_pago" :class="config.inputClass">
+          <select v-model="objetos.reserva.metodode_pago" :class="config.inputClass">
             <option value="">-- Seleccione --</option>
             <option>Efectivo</option>
             <option>Punto de Venta</option>
@@ -209,7 +239,7 @@ const guardarReserva = async () => {
         </div>
         <div class="flex flex-col">
           <label :class="labelClass">Facturación</label>
-          <input type="date" v-model="reserva.facturacion" :class="config.inputClass" />
+          <input type="date" v-model="objetos.reserva.facturacion" :class="config.inputClass" />
         </div>
 
         <div class="md:col-span-2 pt-4 flex flex-row gap-5">
@@ -230,17 +260,17 @@ const guardarReserva = async () => {
           </button>
         </div>
       </form>
-      <div v-if="reserva.cantidad_personas > 1">
+      <div v-if="objetos.reserva.cantidad_personas > 1">
         <div class="bg-gray-800 h-auto w-full my-8 p-8 rounded-2xl flex flex-col gap-8">
           <div
-            v-for="i in reserva.cantidad_personas - 1"
+            v-for="i in objetos.reserva.cantidad_personas - 1"
             :key="i"
             class="bg-[#1f2937] p-8 rounded-2xl shadow-xl border border-gray-700"
           >
             <h3 class="text-blue-400 font-bold uppercase text-xs mb-4">Acompañante #{{ i }}</h3>
 
             <FormHospedajeExtra
-              v-model="reserva.demas[i - 1]"
+              v-model="objetos.reserva.demas[i - 1]"
               :labelClass="labelClass"
               :inputClass="config.inputClass"
             />

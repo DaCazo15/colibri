@@ -37,17 +37,19 @@ export function useSupabase() {
     return { success: true, data }
   }
 
-  const setColumn = async (table, column, value) => {
+  const setColumnItem = async (table, column, newValue, id) => {
     const { data, error } = await supabase
       .from(table)
-      .update({ [column]: value })
-      .eq('id', value.id)
-      .select()
+      .update({ [column]: newValue }) // Actualiza la columna dinámica
+      .eq('id', id) // Usa el ID pasado por parámetro
+      .select() // Retorna el registro cambiado
+
     if (error) {
-      console.error(`Error en setColumn (${table}):`, error.message)
+      console.error(`Error en setColumn (${table} -> ${column}):`, error.message)
       return { success: false, error }
     }
-    return { success: true, data }
+
+    return { success: true, data: data[0] } // Retornamos el primer objeto del array
   }
 
   const existeItemEnTabla = async (table, column, value) => {
@@ -106,7 +108,7 @@ export function useSupabase() {
     getRolByEmail,
     getSelectTable,
     setItem,
-    setColumn,
+    setColumnItem,
     existeItemEnTabla,
     updateTable,
     deleteRow,
