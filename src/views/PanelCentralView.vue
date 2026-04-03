@@ -13,6 +13,9 @@ import FormReserva from '@/components/reserva/FormReserva.vue'
 import ListarHuesped from '@/components/huesped/ListarHuesped.vue'
 import SectionHabitaciones from '@/components/habitaciones/SectionHabitaciones.vue'
 import ConfiguracionesSistema from '@/components/ConfiguracionesSistema.vue'
+import CardHabitaciones from '@/components/habitaciones/CardHabitaciones.vue'
+import SectionServicios from '@/components/servicios/SectionServicios.vue'
+import SectionInventario from '@/components/inventario/SectionInventario.vue'
 
 const { getTable, deleteRow } = useSupabase()
 const { section, setSection } = useSection()
@@ -23,6 +26,8 @@ const sesionOn = ref(false)
 
 const { email, rol } = ruta.query
 const empleados = ref({})
+const idHabitacionSelect = ref('')
+const editar = ref(false)
 const buscar = ref('')
 const datos = reactive({
   email: history.state.email,
@@ -31,8 +36,6 @@ const datos = reactive({
 
 onMounted(async () => {
   verificarSesion()
-  console.log(datos.email)
-  console.log(datos.rol)
   empleados.value = await getTable('empleado')
   if (ruta.query.rol === 'RECEPCIONISTA') setSection('reservas')
   if (ruta.query.rol === 'EMPLEADO') setSection('servicios')
@@ -62,6 +65,24 @@ const cerrarSesion = () => {
   localStorage.removeItem('token')
   sesionOn.value = false
   router.push({ name: 'login', replace: true })
+}
+const idHabitacion = (id) => {
+  idHabitacionSelect.value = id
+  if (!editar.value) return
+  router.push({
+    name: 'editar-habitacion',
+    params: { id },
+    query: {
+      email: datos.email,
+      rol: datos.rol,
+      rolUser: datos.rol,
+      emailUser: datos.email,
+      idHabitacion: id,
+    },
+  })
+}
+const editando = () => {
+  return (editar.value = !editar.value)
 }
 </script>
 
@@ -112,19 +133,30 @@ const cerrarSesion = () => {
         <!-- Habitaciones -->
         <section v-if="section.habitaciones" class="flex-1 w-full min-w-0">
           <div class="w-full flex flex-col justify-end items-center">
-            <RouterLink
-              v-if="['ADMIN', 'ADMINISTRADOR'].includes(datos.rol?.toUpperCase())"
-              to="agregar-habitacion"
-              :query="{
-                email: datos.email,
-                rol: datos.rol,
-                rolUser: datos.rol,
-                emailUser: datos.email,
-              }"
-            >
-              Agregar Habitación
-            </RouterLink>
-            <SectionHabitaciones />
+            <div class="flex flex-row w-full justify-between items-center gap-5">
+              <RouterLink
+                v-if="['ADMIN', 'ADMINISTRADOR'].includes(datos.rol?.toUpperCase())"
+                to="agregar-habitacion"
+                :query="{
+                  email: datos.email,
+                  rol: datos.rol,
+                  rolUser: datos.rol,
+                  emailUser: datos.email,
+                }"
+              >
+                Agregar Habitación
+              </RouterLink>
+              <button
+                @click="editando"
+                v-if="['ADMIN', 'ADMINISTRADOR'].includes(datos.rol?.toUpperCase())"
+                class="py-3 px-4 mb-5 w-full rounded-lg border-2 border-amber-800 text-amber-800 hover:text-white transition-all duration-200 text-center hover:bg-amber-800"
+                :class="{ 'bg-amber-800 text-white': editar }"
+              >
+                Editar Habitación
+              </button>
+            </div>
+            <SectionHabitaciones v-if="!editar" :editar="editar" />
+            <CardHabitaciones v-if="editar" @idHabitacion="idHabitacion" :editar="editar" />
           </div>
         </section>
         <!-- Reservas-->
@@ -150,6 +182,18 @@ const cerrarSesion = () => {
             </button>
           </div>
           <ListarHuesped @eliminar="eliminarEmpleado" :buscar="buscar" />
+        </section>
+        <!-- Servicios -->
+        <section v-if="section.servicios" class="flex-1 w-full min-w-0">
+          <div class="w-full flex justify-end gap-3 items-center">
+            <SectionServicios />
+          </div>
+        </section>
+        <!-- Inventario -->
+        <section v-if="section.inventario" class="flex-1 w-full min-w-0">
+          <div class="w-full flex justify-end gap-3 items-center">
+            <SectionInventario />
+          </div>
         </section>
         <!-- Opciones -->
         <section v-if="section.configuracion" class="flex-1 w-full min-w-0">

@@ -35,7 +35,6 @@ const seleccionar = (hab) => {
       :key="hab.id"
       class="rounded-xl p-3 cursor-pointer active:scale-95 border hover:border-slate-400 transition-all ease-in-out duration-150"
       :class="{
-        // .some() devuelve true si al menos una reserva coincide con esta habitación
         'bg-blue-950 border-blue-950': props.habitacionesFiltradas?.some(
           (res) => res.habitacion === `${hab.numero_habitacion}${hab.torre}`,
         ),
