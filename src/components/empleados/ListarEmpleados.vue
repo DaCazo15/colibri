@@ -15,7 +15,6 @@ const manejarEliminacion = async (id) => {
     empleados.value = empleados.value.filter((emp) => emp.id !== id)
 
     emit('eliminar', id)
-    console.log('Empleado eliminado correctamente')
   } else {
     alert('Error al eliminar: El registro sigue en la base de datos.')
   }

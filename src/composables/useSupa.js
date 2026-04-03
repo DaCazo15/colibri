@@ -27,6 +27,31 @@ export function useSupabase() {
 
     return data.rol // Retorna directamente el valor (ej. "ADMIN")
   }
+  // En useSupa.js
+  const getSelectRow = async (table, item, column = 'id') => {
+    // Añadimos 'column'
+    if (!item) return null
+
+    // Ahora usamos la variable 'column' en lugar de 'email' fijo
+    const { data, error } = await supabase.from(table).select('*').eq(column, item)
+
+    if (error) {
+      console.error(`Error en getSelectRow (${table}):`, error.message)
+      return null
+    }
+
+    return data ? data[0] : null // Retornamos el primer objeto directamente
+  }
+
+  const getSelectTable = async (table, email) => {
+    const { data, error } = await supabase.from(table).select('*').eq('email', email)
+
+    if (error) {
+      console.error(`Error en getSelectTable (${table}):`, error.message)
+      return []
+    }
+    return data
+  }
 
   const setItem = async (table, dataValue) => {
     const { data, error } = await supabase.from(table).insert(dataValue).select()
@@ -62,19 +87,6 @@ export function useSupabase() {
     return data !== null
   }
 
-  const getSelectTable = async (table, item) => {
-    if (!item) return null
-
-    const { data, error } = await supabase.from(table).select('*').eq('email', item)
-
-    if (error) {
-      console.error(`Error en getSelectTable (${table}):`, error.message)
-      return null
-    }
-
-    return data
-  }
-
   const updateTable = async (table, id, dataValue) => {
     const payload = { ...dataValue }
     delete payload.id
@@ -106,6 +118,7 @@ export function useSupabase() {
     supabase,
     getTable,
     getRolByEmail,
+    getSelectRow,
     getSelectTable,
     setItem,
     setColumnItem,

@@ -52,6 +52,14 @@ const router = createRouter({
       },
       component: () => import('../views/form-habitaciones/AgregarHabitacionView.vue'),
     },
+    {
+      path: '/editar-habitacion/:id',
+      name: 'editar-habitacion',
+      props: {
+        page: 'Editar Habitación',
+      },
+      component: () => import('../views/form-habitaciones/EditarHabitacionesView.vue'),
+    },
   ],
 })
 

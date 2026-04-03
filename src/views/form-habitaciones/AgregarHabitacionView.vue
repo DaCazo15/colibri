@@ -43,7 +43,6 @@ const handleSubmit = async () => {
   }
 }
 const back = async () => {
-  console.log(route)
   cambioRuta.push({
     name: 'center-panel',
     query: {

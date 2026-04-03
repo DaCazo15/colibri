@@ -11,13 +11,40 @@ const items = ref([])
 const verModal = ref(false)
 const huespedSeleccionado = ref(null)
 
-const manejarEliminacion = async (id) => {
-  const exito = await deleteRow('huesped', id)
-  if (exito) {
-    items.value = items.value.filter((emp) => emp.id !== id)
-    emit('eliminar', id)
-  } else {
-    alert('Error al eliminar: El registro sigue en la base de datos.')
+// En este componente (el padre):
+const conseguirID = async (huesped) => {
+  const historialCompleto = await getTable('usu_historial_reserva')
+  const registroHistorial = historialCompleto.find(
+    (h) => h.cedula_identidad === huesped.encargado_cedula,
+  )
+
+  return {
+    huespedId: huesped.id,
+    historialId: registroHistorial ? registroHistorial.id : null,
+  }
+}
+
+const manejarEliminacion = async (huespedObjeto) => {
+  if (!confirm('¿Estás seguro de esta acción?')) return
+
+  const ids = await conseguirID(huespedObjeto)
+
+  try {
+    const resHuesped = await deleteRow('huesped', ids.huespedId)
+
+    let resHistorial = true
+    if (ids.historialId) {
+      resHistorial = await deleteRow('usu_historial_reserva', ids.historialId)
+    }
+
+    if (resHuesped && resHistorial) {
+      items.value = items.value.filter((h) => h.id !== ids.huespedId)
+      console.log('Eliminación exitosa de ambas tablas')
+    } else {
+      alert('Hubo un problema al eliminar alguno de los registros.')
+    }
+  } catch (error) {
+    console.error('Error en el proceso de eliminación:', error)
   }
 }
 
@@ -28,7 +55,6 @@ const abrirDetalle = (huesped) => {
 
 const existenClientes = computed(() => itemsOrdenados.value.length > 0)
 
-const emit = defineEmits(['eliminar'])
 const props = defineProps({
   buscar: { type: String, required: true },
 })

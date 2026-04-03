@@ -27,7 +27,6 @@ const handleLogin = async () => {
       let rol = await getRolByEmail('usuario', email.value)
       if (users.value) {
         const ok = await inspector(data, users.value)
-        console.log(ok)
         if (ok) {
           error.value = false
           cambioRuta.push({

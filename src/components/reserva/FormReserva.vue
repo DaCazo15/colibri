@@ -6,7 +6,7 @@ import FormHospedajeExtra from './FormReservaExtra.vue'
 import { useSupabase } from '../../composables/useSupa'
 import useSection from '@/composables/useSection'
 
-const { setItem, getTable, setColumnItem } = useSupabase()
+const { setItem, getTable } = useSupabase()
 const { setSection } = useSection()
 
 const submitting = ref(false)
@@ -59,18 +59,22 @@ const cleanData = (obj) => {
 }
 
 const asignarHistorial = (reserva) => {
-  const habSeleccionada = data.value.find((h) => h.id === reserva.habitacion)
+  // Buscamos la habitación comparando la concatenación, no el ID
+  const habSeleccionada = data.value.find(
+    (h) => `${h.numero_habitacion}${h.torre}` === reserva.habitacion,
+  )
+
   const nombreHab = habSeleccionada
     ? `${habSeleccionada.numero_habitacion}${habSeleccionada.torre}`
-    : 'N/A'
+    : reserva.habitacion
 
-  // Importante: No uses strings vacíos en arrays si la columna espera JSON válido
+  console.log(nombreHab)
   Object.assign(objetos.usu_historial_reserva, {
     name_huesped: `${reserva.encargado} ${reserva.encargado_apellido}`,
     cedula_identidad: reserva.encargado_cedula,
-    habitacion: nombreHab,
+    habitacion: nombreHab, // Aquí se guarda el string "101A"
     fecha_reserva: reserva.fecha_reserva,
-    reserva: reserva, // Supabase manejará esto como JSONB automáticamente
+    reserva: reserva,
     servicio: [],
     inventario_habitacion: [],
     multa: [],
@@ -87,7 +91,7 @@ const guardarReserva = async () => {
     alert('Existen campos sin llenar')
     return
   }
-
+  console.log(objetos.reserva.habitacion)
   submitting.value = true
 
   try {
@@ -101,7 +105,6 @@ const guardarReserva = async () => {
     const [resHuesped, resHistorial] = await Promise.all([
       setItem('huesped', reservaLimpia),
       setItem('usu_historial_reserva', objetos.usu_historial_reserva),
-      setColumnItem('habitaciones', 'estatus', 'Reservado', objetos.reserva.habitacion),
     ])
 
     if (resHuesped.success && resHistorial.success) {
@@ -185,7 +188,11 @@ const guardarReserva = async () => {
           <label :class="labelClass">Nro. de habitacion</label>
           <select v-model="objetos.reserva.habitacion" :class="config.inputClass">
             <option value="">-- Seleccione --</option>
-            <option v-for="value in data" :key="value.id" :value="value.id">
+            <option
+              v-for="value in data"
+              :key="value.id"
+              :value="`${value.numero_habitacion}${value.torre}`"
+            >
               {{ value.numero_habitacion }}{{ value.torre }}
             </option>
           </select>

@@ -41,7 +41,6 @@ const handleSubmit = async () => {
 
   try {
     await setItem('usuario', datosUsuario)
-    console.log('Usuario creado con éxito')
 
     await setItem('empleado', empleado).then(() => {
       cambioRuta.push({ name: 'center-panel', query: route.query, params: route.query.rol })
@@ -52,7 +51,6 @@ const handleSubmit = async () => {
   }
 }
 const back = async () => {
-  console.log(route)
   cambioRuta.push({
     name: 'center-panel',
     query: {

@@ -5,6 +5,7 @@ const props = defineProps({
     required: true,
   },
 })
+console.log(props.huesped)
 
 const emit = defineEmits(['eliminar', 'ver-detalle'])
 const nombre = props.huesped.encargado + ' ' + props.huesped.encargado_apellido
@@ -57,7 +58,7 @@ const seleccionarHuesped = (e) => {
     >
       <button
         class="text-red-500 hover:text-red-400 font-bold uppercase text-[10px] tracking-widest"
-        @click.stop="emit('eliminar', props.huesped.id)"
+        @click.stop="emit('eliminar', props.huesped)"
       >
         Eliminar
       </button>
