@@ -38,7 +38,7 @@ defineEmits(['cerrar'])
           }"
           :key="label"
         >
-          <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">
+          <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">
             {{ label }}
           </p>
           <p class="text-gray-100 font-medium border-l-2 border-blue-600 pl-3 bg-blue-600/5 py-1">

@@ -40,7 +40,7 @@ const detalles = computed(() => {
       <!--  -->
       <!--  -->
       <div class="flex justify-between items-center mb-6">
-        <h3 class="text-blue-400 font-black uppercase text-sm tracking-widest">
+        <h3 class="text-blue-400 font-bold uppercase text-sm tracking-widest">
           Detalles de Reserva #{{ props.itemsFiltrados.id }}
         </h3>
         <span class="px-3 py-1 bg-blue-600/20 text-blue-400 rounded-full text-xs font-bold">

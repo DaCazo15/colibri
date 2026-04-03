@@ -1,3 +1,4 @@
+import { reactive } from 'vue'
 const opciones = {
   promocion: {
     id: 0,
@@ -70,6 +71,13 @@ const colTableHuesped = [
   'Facturacion',
 ]
 
+const buttonClass = reactive({
+  cerrar:
+    'w-full p-3 bg-transparent border border-orange-800 text-orange-800 hover:bg-orange-800 hover:text-white rounded-lg transition-all duration-300 ease-in-out',
+  activo:
+    'w-full p-3 bg-transparent border border-blue-700 text-blue-700 hover:bg-blue-500 hover:text-white rounded-lg transition-all duration-300 ease-in-out',
+})
+
 const inputClass =
   'w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-gray-700 bg-gray-100'
 
@@ -105,6 +113,7 @@ export default {
   colTable,
   colTableHuesped,
   inputClass,
+  buttonClass,
   turnos,
   roles,
 }

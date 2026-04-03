@@ -143,7 +143,7 @@ const back = async () => {
         <div class="md:col-span-2 pt-4">
           <button
             type="submit"
-            class="w-full bg-blue-500 hover:bg-blue-600 text-gray-50 font-black py-4 rounded-xl transition-all duration-300 shadow-lg active:scale-[0.98] uppercase tracking-tighter text-lg"
+            class="w-full bg-blue-500 hover:bg-blue-600 text-gray-50 font-bold py-4 rounded-xl transition-all duration-300 shadow-lg active:scale-[0.98] uppercase tracking-tighter text-lg"
           >
             Añadir Habitación
           </button>

@@ -4,6 +4,7 @@ import { useSupabase } from '../../composables/useSupa'
 import MostrarHuesped from './MostraHuesped.vue'
 import ModalDetalleHuesped from './ModalDetallesHuesped.vue'
 import config from '@/helpers/config'
+import MensajeUX from '../UX/MensajeUX.vue'
 
 const { getTable, deleteRow } = useSupabase()
 
@@ -109,8 +110,5 @@ onMounted(async () => {
       </table>
     </div>
   </div>
-
-  <p v-else class="text-gray-400 text-xl text-center py-20 font-light italic">
-    No hay huespedes actualmente...
-  </p>
+  <MensajeUX v-else mensaje="No hay huespedes actualmente..." />
 </template>

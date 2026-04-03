@@ -17,6 +17,24 @@ const reserva = reactive({
   demas: [],
 })
 
+const items_Inventario = reactive([
+  { id: 1, value: 'Viveres', label: 'Viveres' },
+  { id: 2, value: 'Bebidas', label: 'Bebidas' },
+  { id: 3, value: 'Alimentos', label: 'Alimentos' },
+  { id: 4, value: 'Utencilios', label: 'Utencilios' },
+  { id: 5, value: 'Habitacion', label: 'Habitacion' },
+  { id: 6, value: 'Piscina', label: 'Piscina' },
+  { id: 7, value: 'Otros', label: 'Otros' },
+])
+
+const data_receta = reactive({
+  nombre: '',
+  tipo: '',
+  receta: [],
+  indicaciones: '',
+  precio: 0,
+})
+
 const usu_historial_reserva = reactive({
   name_huesped: '',
   reserva: [],
@@ -30,4 +48,6 @@ const usu_historial_reserva = reactive({
 export default {
   reserva,
   usu_historial_reserva,
+  items_Inventario,
+  data_receta,
 }

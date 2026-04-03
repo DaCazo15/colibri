@@ -122,7 +122,7 @@ const guardarReserva = async () => {
 </script>
 
 <template>
-  <div class="min-h-screen w-full px-4 bg-[#0f172a]">
+  <div class="min-h-screen w-full bg-[#0f172a]">
     <div class="max-w-full w-full table-auto divide-y divide-gray-200">
       <form class="grid grid-cols-1 md:grid-cols-2 gap-8 bg-[#1f2937] p-8 rounded-2xl shadow-2xl">
         <div class="md:col-span-2 border-b border-gray-700 pb-2">
@@ -254,14 +254,14 @@ const guardarReserva = async () => {
             type="button"
             @click="guardarReserva"
             :disabled="submitting"
-            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-xl transition-all shadow-lg shadow-blue-900/40 uppercase tracking-tighter text-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-blue-900/40 uppercase tracking-tighter text-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Confirmar Reserva
           </button>
           <button
             type="button"
             @click="clear"
-            class="w-full bg-red-600 hover:bg-red-700 text-white font-black py-4 rounded-xl transition-all shadow-lg shadow-red-900/40 uppercase tracking-tighter text-lg active:scale-95"
+            class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-red-900/40 uppercase tracking-tighter text-lg active:scale-95"
           >
             Limpiar Reserva
           </button>
